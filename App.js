@@ -2,47 +2,114 @@
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
+import { createSwitchNavigator } from 'react-navigation';
 
-import './Global.js';
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import MyProfileScreen from './screens/MyProfileScreen';
-import UserProfileScreen from './screens/UserProfile';
+import UserProfileScreen from './screens/UserProfileScreen';
+import SignUpScreen from './screens/SignUpScreen';
+import UpdateUserInfoScreen from './screens/UpdateUserInfoScreen';
+import CreateChitScreen from './screens/CreateChitScreen';
+import FollowersScreen from './screens/FollowersScreen';
+
 
 const homeAppsStack = createStackNavigator({
-  Home:{
-    screen: HomeScreen
+  AllChits:{
+    screen: HomeScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
   },
-  UserProfile:{
+  OtherUserProfile:{
     screen: UserProfileScreen
   }
-  })
+},{
+  initialRouteName:"AllChits",
+  });
+
+const ChitStack = createStackNavigator({
+  CreateChit: {
+    screen: CreateChitScreen,
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+
+}, {
+  initialRouteName:"CreateChit",
+});
+
+const userAppStack = createStackNavigator({
+  UserProfile:{
+    screen: MyProfileScreen
+  },
+  UpdateUserInfo:{
+    screen: UpdateUserInfoScreen
+  },
+  Followers:{
+    screen: FollowersScreen
+  },
+  OtherUserProfile:{
+    screen: UserProfileScreen
+  },
+},{
+  initialRouteName:"UserProfile",
+});
 
 const AppTabNav = createBottomTabNavigator({
   Home: {
     screen: homeAppsStack
     },
+  Chit: {
+    screen: ChitStack
+  },
   MyProfile: {
-    screen: MyProfileScreen
+    screen: userAppStack
   }
 });
 
-const AppStackNav = createStackNavigator({
+const LoginStackNav = createStackNavigator({
+  Login:{
+    screen: LoginScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
+  },
+  SignUp: {
+    screen: SignUpScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
+  },
+}, {
+  initialRouteName:"Login",
+});
+
+/*const AppStackNav = createStackNavigator({
     tabs: {
       screen: AppTabNav,
       navigationOptions: {
         headerShown: false,
       }
     },
-    Login: {
-      screen: LoginScreen,
+    LoginTabs: {
+      screen: LoginStackNav,
       navigationOptions: {
-        headerShown:false,
+        headerShown: false,
       }
     }
 }, {
-    initialRouteName:"Login",
-  });
+    initialRouteName:"LoginTabs",
+  });*/
+
+const AppStackNav = createSwitchNavigator({
+    App: AppTabNav,
+    Auth: LoginStackNav,
+}, {
+  initialRouteName: 'Auth',
+  }
+);
 
 const AppContainer = createAppContainer(AppStackNav);
 
