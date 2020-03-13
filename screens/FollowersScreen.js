@@ -16,18 +16,20 @@ constructor(props){
   super(props);
   this.state = {
     type: this.props.navigation.state.params.type,
-    user_id: this.props.navigation.state.params.user_id,
-    followersDataJson: "",
-    followersArray : [],
-    totalFollow : 0,
+    data:this.props.navigation.state.params.data,
   }
   this.getUser = this.getUser.bind(this);
-  this.populateArray = this.populateArray.bind(this);
+  this.refresh = this.refresh.bind(this);
 }
 
-componentDidMount(){
-  this.getData();
+componentDidMount = async() => {
+  //await this.getData();
   //this.populateArray();
+  //this.setNumbers();
+}
+
+refresh(){
+  console.log(this.state.data.idArray);
 }
 
 getData() {
@@ -59,8 +61,8 @@ populateArray(){
   try{
     this.setState({followersArray : this.state.followersDataJson.map(function(item){
       return item.user_id
-    })});
-
+    })}
+  );
     return true;
   } catch(error){
     console.log(error);
@@ -83,7 +85,7 @@ getUser(user){
   if(user.user_id == global.user_id){
     this.props.navigation.push('UserProfile');
   } else {
-    this.props.navigation.push('OtherUserProfile', { userJson: user});
+    this.props.navigation.push('OtherUserProfile', { user_id: user.user_id});
   }
 }
 
@@ -91,22 +93,24 @@ getUser(user){
     return(
       <View>
         <Text>{this.state.type}</Text>
-        <Text>{this.state.user_id}</Text>
-        <Text>{this.state.totalFollow}</Text>
+        <Text>{this.state.type} = {this.state.data.total}</Text>
+        <Text> IDARRAY = {this.state.data.idArray}</Text>
 
         <FlatList
-          data={this.state.followersDataJson}
+          data={this.state.data.data}
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
             <TouchableOpacity onPress={() => this.getUser(item)}>
               <Text>{item.given_name + " " + item.family_name}</Text>
             </TouchableOpacity>
             </ScrollView>
+
         }
         keyExtractor={item => item.user_id.toString()}
         />
 
-        <Button title="FUCK YOU" onPress={this.setNumbers} />
+        <Button title="HAA"
+          onPress={this.refresh}/>
       </View>
     );
   }
