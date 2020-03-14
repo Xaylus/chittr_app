@@ -5,7 +5,9 @@ class CreateChit extends Component{
 constructor(props){
   super(props);
   this.state = {
-    
+    data: {
+      name: 'name'
+    }
   }
 }
 
@@ -13,7 +15,7 @@ constructor(props){
     return(
       <View>
         <Text>My Profile</Text>
-
+        <Text>{this.state.data.name}</Text>
 
       </View>
     );
