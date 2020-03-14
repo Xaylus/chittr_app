@@ -19,7 +19,24 @@ constructor(props){
     chitsList: [],
   }
 
+  global.followers = {
+    data: "",
+    idArray: [],
+    total: 0,
+    isChanged: false,
+  };
+
+  global.following ={
+    total: "",
+    idArray: [],
+    total: 0,
+    isChanged: false,
+  };
+
   this.search = this.search.bind(this);
+  this.getFollowersData = this.getFollowersData.bind(this);
+  this.getFollowingData = this.getFollowingData.bind(this);
+  this.FollowUser = this.FollowUser.bind(this);
   //this.getData = this.getData.bind(this);
 }
 
@@ -39,7 +56,7 @@ search = () => {
 
 getData(){
   var start = 0;
-  var count = 3;
+  var count = 5;
   return fetch("http://10.0.2.2:3333/api/v0.0.5/chits?start=" + start + "&count=" + count,{
     method:'GET',
     headers:{
@@ -56,6 +73,76 @@ getData(){
   })
 }
 
+FollowUser(){
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + this.state.searchItem + "/follow",{
+    method:'POST',
+    headers:{
+      'X-Authorization': global.token,
+    },
+  }).then((response) =>{
+    if(response.status == 200){
+      alert("following");
+    } else {
+      alert('Something went wrong please try again later');
+    }
+  }).catch((error) => console.log(error));
+}
+
+getFollowersData(){
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + global.user_id + "/followers",{
+    method:'GET',
+    headers:{
+      'X-Authorization': global.token,
+    }
+  }).then((response) =>{
+    if(response.status == '200'){
+      return response.json();
+    } else return "Err";
+  }).then((response) =>{
+    if(response == 'Err'){
+      alert('nothing found');
+    }else{
+      const tempArray = response.map(function(item){
+        return item.user_id
+      });
+        global.followers.data = response;
+        global.followers.idArray = tempArray;
+        global.followers.total = tempArray.length;
+    }
+  }).catch((error)=>{
+    console.log(error);
+  });
+}
+
+getFollowingData(){
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + global.user_id + "/following",{
+    method:'GET',
+    headers:{
+      'X-Authorization': global.token,
+    }
+  }).then((response) =>{
+    if(response.status == '200'){
+      return response.json();
+    } else return "Err";
+  }).then((response) =>{
+    if(response == 'Err'){
+      alert('nothing found');
+    }else{
+      console.log(response);
+      const tempArray = response.map(function(item){
+        return item.user_id
+      });
+      global.following.data = response;
+      global.following.idArray = tempArray;
+      global.following.total = tempArray.length;
+      console.log(global.following.total);
+    }
+  }).catch((error)=>{
+    console.log(error);
+  });
+}
+
+
   render(){
     if(this.state.isLoading){
       return(
@@ -69,9 +156,9 @@ getData(){
         <TextInput placeholder="  Search  "
           onChangeText={(text) => this.setState({searchItem: text})}
           value={this.state.searchItem}/>
-        <Button title="Submit" onPress={this.search}/>
+        <Button title="Submit" onPress={this.FollowUser}/>
         <Text>Home Screen</Text>
-        <Text>{global.token}</Text>
+        <Text>{global.following.total}</Text>
         <FlatList
           data={this.state.chitsList}
           renderItem={ ({item}) =>
@@ -86,8 +173,13 @@ getData(){
     );
   }
 
-  componentDidMount(){
-    this.getData();
+  componentDidMount = async() => {
+    await this.getData();
+
+    //dont use await as these should be done in the background
+    // without after the data has loaded
+    this.getFollowersData();
+    this.getFollowingData();
   }
 
 
