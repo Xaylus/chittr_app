@@ -144,10 +144,10 @@ componentDidMount = async() =>{
 }
 
 Followers(){
-  this.props.navigation.push('Followers', { type: 'followers', user_id: this.state.userJson.user_id});
+  this.props.navigation.push('Followers', { type: 'followers', user_id: this.state.user_id});
 }
 Following(){
-  this.props.navigation.push('Followers', {type: 'following', user_id: this.state.userJson.user_id});
+  this.props.navigation.push('Followers', {type: 'following', user_id: this.state.user_id});
 }
 
 FollowUser(){

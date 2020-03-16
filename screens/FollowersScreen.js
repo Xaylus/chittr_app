@@ -93,8 +93,6 @@ getUser(user){
     return(
       <View>
         <Text>{this.state.type}</Text>
-        <Text>{this.state.type} = {this.state.data.total}</Text>
-        <Text> IDARRAY = {this.state.data.idArray}</Text>
 
         <FlatList
           data={this.state.data.data}

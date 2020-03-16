@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   StyleSheet
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class HomeScreen extends Component{
 constructor(props){
@@ -17,6 +18,7 @@ constructor(props){
     isLoading: true,
     searchItem: "",
     chitsList: [],
+    test: "",
   }
 
   global.followers = {
@@ -37,6 +39,7 @@ constructor(props){
   this.getFollowersData = this.getFollowersData.bind(this);
   this.getFollowingData = this.getFollowingData.bind(this);
   this.FollowUser = this.FollowUser.bind(this);
+  this.asyncTest = this.asyncTest.bind(this);
   //this.getData = this.getData.bind(this);
 }
 
@@ -52,6 +55,15 @@ search = () => {
     console.log(error);
   })*/
   this.props.navigation.navigate('UserProfile');
+}
+
+asyncTest = async() => {
+  try{
+    const token = await AsyncStorage.getItem('token')
+    this.setState({test: token});
+  } catch(error) {
+    console.log(error);
+  }
 }
 
 getData(){
@@ -159,6 +171,7 @@ getFollowingData(){
         <Button title="Submit" onPress={this.FollowUser}/>
         <Text>Home Screen</Text>
         <Text>{global.following.total}</Text>
+        <Text> token = {this.state.test}</Text>
         <FlatList
           data={this.state.chitsList}
           renderItem={ ({item}) =>
@@ -175,9 +188,11 @@ getFollowingData(){
 
   componentDidMount = async() => {
     await this.getData();
+    console.log("global token = " + global.token);
 
     //dont use await as these should be done in the background
     // without after the data has loaded
+    this.asyncTest();
     this.getFollowersData();
     this.getFollowingData();
   }

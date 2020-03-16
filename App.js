@@ -3,6 +3,7 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createSwitchNavigator } from 'react-navigation';
+import {AsyncStorage} from '@react-native-community/async-storage';
 
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -35,7 +36,6 @@ const ChitStack = createStackNavigator({
       headerShown: false,
     },
   },
-
 }, {
   initialRouteName:"CreateChit",
 });
