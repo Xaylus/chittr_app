@@ -19,25 +19,10 @@ constructor(props){
     searchItem: "",
     chitsList: [],
     test: "",
+    userData: "",
   }
 
-  global.followers = {
-    data: "",
-    idArray: [],
-    total: 0,
-    isChanged: false,
-  };
-
-  global.following ={
-    total: "",
-    idArray: [],
-    total: 0,
-    isChanged: false,
-  };
-
   this.search = this.search.bind(this);
-  this.getFollowersData = this.getFollowersData.bind(this);
-  this.getFollowingData = this.getFollowingData.bind(this);
   this.FollowUser = this.FollowUser.bind(this);
   this.asyncTest = this.asyncTest.bind(this);
   //this.getData = this.getData.bind(this);
@@ -45,15 +30,20 @@ constructor(props){
 
 search = () => {
   //let query = "SELECT * FROM "
-  /*return fetch("http://10.0.2.2:3333/api/v0.0.5/search_user/" + this.state.searchItem,{
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/search_user/?q=" + this.state.searchItem,{
     method:'GET'
-  }).then((response) => response.json()).then((responseJson) => {
-    this.props.navigation.navigate('UserProfile', {
-      userJson: responseJson,
-    });
+  }).then((response) => {
+    console.log(response);
+    return response.json()
+  }).then((responseJson) => {
+    console.log(responseJson);
+    console.log(responseJson.user_id);
+  //  this.props.navigation.navigate('OtherUserProfile', {
+  //    user_id: responseJson.user_id,
+  //  });
   }).catch((error) => {
     console.log(error);
-  })*/
+  })
   this.props.navigation.navigate('UserProfile');
 }
 
@@ -69,7 +59,7 @@ asyncTest = async() => {
 getData(){
   var start = 0;
   var count = 5;
-  return fetch("http://10.0.2.2:3333/api/v0.0.5/chits?start=" + start + "&count=" + count,{
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/chits",{
     method:'GET',
     headers:{
       'X-Authorization': global.token,
@@ -83,6 +73,37 @@ getData(){
   }).catch((error) =>{
     console.log(error);
   })
+}
+
+getUserData(){
+  console.log(global.user_id);
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + global.user_id,{
+    method:'GET',
+    headers: {
+      'X-Authorization': global.token,
+    }
+  }).then((response) => response.json()).then((responseJson) =>{
+      this.setState({
+        userData: {
+          user_id: responseJson.user_id,
+          given_name: responseJson.given_name,
+          family_name: responseJson.family_name,
+          email: responseJson.email,
+        }
+      });
+      this.storeUserData();
+      console.log(responseJson);
+    }).catch((error) =>{
+      console.log(error);
+  });
+}
+
+storeUserData = async() =>{
+  try{
+    await AsyncStorage.setItem('userData', JSON.stringify(this.state.userData))
+  } catch(error){
+    console.log(error);
+  }
 }
 
 FollowUser(){
@@ -100,61 +121,6 @@ FollowUser(){
   }).catch((error) => console.log(error));
 }
 
-getFollowersData(){
-  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + global.user_id + "/followers",{
-    method:'GET',
-    headers:{
-      'X-Authorization': global.token,
-    }
-  }).then((response) =>{
-    if(response.status == '200'){
-      return response.json();
-    } else return "Err";
-  }).then((response) =>{
-    if(response == 'Err'){
-      alert('nothing found');
-    }else{
-      const tempArray = response.map(function(item){
-        return item.user_id
-      });
-        global.followers.data = response;
-        global.followers.idArray = tempArray;
-        global.followers.total = tempArray.length;
-    }
-  }).catch((error)=>{
-    console.log(error);
-  });
-}
-
-getFollowingData(){
-  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + global.user_id + "/following",{
-    method:'GET',
-    headers:{
-      'X-Authorization': global.token,
-    }
-  }).then((response) =>{
-    if(response.status == '200'){
-      return response.json();
-    } else return "Err";
-  }).then((response) =>{
-    if(response == 'Err'){
-      alert('nothing found');
-    }else{
-      console.log(response);
-      const tempArray = response.map(function(item){
-        return item.user_id
-      });
-      global.following.data = response;
-      global.following.idArray = tempArray;
-      global.following.total = tempArray.length;
-      console.log(global.following.total);
-    }
-  }).catch((error)=>{
-    console.log(error);
-  });
-}
-
-
   render(){
     if(this.state.isLoading){
       return(
@@ -168,9 +134,8 @@ getFollowingData(){
         <TextInput placeholder="  Search  "
           onChangeText={(text) => this.setState({searchItem: text})}
           value={this.state.searchItem}/>
-        <Button title="Submit" onPress={this.FollowUser}/>
+        <Button title="Submit" onPress={this.search}/>
         <Text>Home Screen</Text>
-        <Text>{global.following.total}</Text>
         <Text> token = {this.state.test}</Text>
         <FlatList
           data={this.state.chitsList}
@@ -188,13 +153,11 @@ getFollowingData(){
 
   componentDidMount = async() => {
     await this.getData();
+    await this.getUserData();
     console.log("global token = " + global.token);
-
     //dont use await as these should be done in the background
     // without after the data has loaded
     this.asyncTest();
-    this.getFollowersData();
-    this.getFollowingData();
   }
 
 

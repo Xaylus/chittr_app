@@ -13,6 +13,7 @@ import SignUpScreen from './screens/SignUpScreen';
 import UpdateUserInfoScreen from './screens/UpdateUserInfoScreen';
 import CreateChitScreen from './screens/CreateChitScreen';
 import FollowersScreen from './screens/FollowersScreen';
+import SavedChitsScreen from './screens/SavedChitsScreen';
 
 
 const homeAppsStack = createStackNavigator({
@@ -33,6 +34,12 @@ const ChitStack = createStackNavigator({
   CreateChit: {
     screen: CreateChitScreen,
     navigationOptions: {
+      headerShown: false,
+    },
+  },
+  SavedChits: {
+    screen: SavedChitsScreen,
+    navigationOptions:{
       headerShown: false,
     },
   },
