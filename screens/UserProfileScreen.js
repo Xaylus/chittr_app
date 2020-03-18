@@ -6,6 +6,7 @@ import {
   FlatList,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 
 class UserProfile extends Component{
@@ -15,23 +16,18 @@ constructor(props){
     user_id: this.props.navigation.state.params.user_id,
     userData: "",
     chitsList: "",
-    isFollowing: false,
-    following: {
-      data: "",
-      total: 0,
-    },
-    followers: {
-      data: "",
-      total: 0,
-    },
+    isFollowingYou: false,
+    youFollowingUser: false,
+    followingTotal: 0,
+    followersTotal:0,
     followButtonName: "Follow",
+    isLoading: true,
   }
   this.Followers = this.Followers.bind(this);
   this.Following = this.Following.bind(this);
   this.getUserData = this.getUserData.bind(this);
   this.getFollowersData = this.getFollowersData.bind(this);
   this.getFollowingData = this.getFollowingData.bind(this);
-  this.isFollowing = this.isFollowing.bind(this);
   this.isFollowingRender = this.isFollowingRender.bind(this);
   this.FollowBtnPress = this.FollowBtnPress.bind(this);
 
@@ -66,15 +62,16 @@ getFollowersData(){
     if(response == 'Err'){
       alert('nothing found');
     }else{
-      const tempArray = response.map(function(item){
+      let tempArray = response.map(function(item){
         return item.user_id
       });
-      this.setState({
-        followers: {
-          data: response,
-          total: tempArray.length,
-        }
-      });
+      if(tempArray.includes(global.user_id)){
+        this.setState({
+          youFollowingUser: true,
+          followButtonName: "Unfollow",
+        });
+      }
+      this.setState({followersTotal: tempArray.length});
     }
   }).catch((error)=>{
     console.log(error);
@@ -96,41 +93,21 @@ getFollowingData(){
       alert('nothing found');
     }else{
       console.log(response);
-      const tempArray = response.map(function(item){
+      let tempArray = response.map(function(item){
+        if(item.user_id == global.user_id){
+          this.setState({isFollowingYou: true});
+        }
         return item.user_id
       });
-      this.setState({
-        following: {
-          data: response,
-          total: tempArray.length,
-        }
-      });
-
+      this.setState({followingTotal: tempArray.length});
     }
   }).catch((error)=>{
     console.log(error);
   });
 }
 
-isFollowing(){
-  if(global.following.idArray.includes(this.state.user_id)){
-    console.log("IS FOLLOWING");
-    this.setState({
-      isFollowing: true,
-      followButtonName: "Unfollow",
-    });
-  } else {
-    console.log("NOT FOLLOWING");
-    this.setState({
-      isFollowing: false,
-      followButtonName: "Follow",
-    });
-  }
-
-}
-
 isFollowingRender(){
-  if(this.state.isFollowing){
+  if(this.state.isFollowingYou){
     return(
         <Text> {this.state.userData.given_name} follows you! </Text>
     );
@@ -140,7 +117,7 @@ componentDidMount = async() =>{
   await this.getUserData();
   await this.getFollowersData();
   await this.getFollowingData();
-  this.isFollowing();
+  this.setState({isLoading: false});
 }
 
 Followers(){
@@ -159,15 +136,10 @@ FollowUser(){
   }).then((response) =>{
     if(response.status == 200){
       this.setState({
-        isFollowing: false,
+        youFollowingUser: true,
         followButtonName: "UnFollow",
-        followers: {
-          data: this.state.followers.data.filter(user => user.user_id !== global.user_id),
-          total: this.state.followers.total + 1,
-        }
+        followersTotal: this.state.followersTotal +1,
       });
-      global.following.idArray = [global.following.idArray, this.state.user_id];
-      global.following.total = global.following.idArray.length;
       alert("following");
     } else {
       alert('Something went wrong please try again later');
@@ -184,14 +156,10 @@ UnfollowUser(){
   }).then((response) =>{
     if(response.status == 200){
       this.setState({
-        isFollowing: false,
+        youFollowingUser: false,
         followButtonName: "Follow",
-        followers: {
-          data: this.state.following.data.filter(user => user.user_id !== global.user_id),
-          total: this.state.followers.total - 1,
-        }
+        followersTotal: this.state.followersTotal - 1,
       });
-      global.following.idArray = global.following.idArray.filter(id => id !== this.state.user_id); // if worked
       alert("Unfollowed!");
     } else {
       alert('Something went wrong please try again later');
@@ -201,17 +169,23 @@ UnfollowUser(){
 
 FollowBtnPress(){
   //Follower count and following count
-  if(this.state.isFollowing){
+  if(this.state.youFollowingUser){
     // unfollow stuff
     this.UnfollowUser();
   } else {
     //Follow user
     this.FollowUser();
   }
-  console.log(global.following.idArray);
 }
 
   render(){
+    if(this.state.isLoading){
+      return(
+        <View>
+          <ActivityIndicator/>
+        </View>)
+    }
+
     return(
       <View>
         <Text>My Profile</Text>
@@ -230,8 +204,8 @@ FollowBtnPress(){
           onPress={this.Followers} />
         <Button title="Following"
         onPress={this.Following} />
-        <Text> Num of Following = {this.state.following.total}</Text>
-        <Text> Num of Followers = {this.state.followers.total}</Text>
+        <Text> Num of Following = {this.state.followingTotal}</Text>
+        <Text> Num of Followers = {this.state.followersTotal}</Text>
         <Button title={this.state.followButtonName}
           onPress={this.FollowBtnPress} />
           {this.isFollowingRender()}

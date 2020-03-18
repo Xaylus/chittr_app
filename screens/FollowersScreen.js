@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 
 // this screen will be used for both followers and following
@@ -16,20 +17,20 @@ constructor(props){
   super(props);
   this.state = {
     type: this.props.navigation.state.params.type,
-    data:this.props.navigation.state.params.data,
+    data:"",
+    user_id: this.props.navigation.state.params.user_id,
+    isLoading: true,
   }
   this.getUser = this.getUser.bind(this);
   this.refresh = this.refresh.bind(this);
 }
 
 componentDidMount = async() => {
-  //await this.getData();
-  //this.populateArray();
-  //this.setNumbers();
+  await this.getData();
+  this.setState({isLoading: false});
 }
 
 refresh(){
-  console.log(this.state.data.idArray);
 }
 
 getData() {
@@ -46,7 +47,7 @@ getData() {
     if(response == 'Err'){
       alert('nothing found');
     }else{
-      this.setState({followersDataJson: response});
+      this.setState({data: response});
         //console.log(this.state.followersDataJson);
     }
   }).catch((error)=>{
@@ -54,32 +55,6 @@ getData() {
   });
 }
 
-populateArray(){
-  //this.setState({totalFollow: this.state.followersDataJson.length});
-  console.log(this.state.followersDataJson);
-  //var data = JSON.parse(this.state.followersDataJson);
-  try{
-    this.setState({followersArray : this.state.followersDataJson.map(function(item){
-      return item.user_id
-    })}
-  );
-    return true;
-  } catch(error){
-    console.log(error);
-    return false;
-  }
-
-}
-
-setNumbers = async() => {
-  const answer = await this.populateArray();
-  if(answer){
-    console.log(this.state.followersArray);
-    this.setState({totalFollow: this.state.followersArray.length});
-  } else {
-    console.log("nothing");
-  }
-}
 
 getUser(user){
   if(user.user_id == global.user_id){
@@ -90,12 +65,19 @@ getUser(user){
 }
 
   render(){
+    if(this.state.isLoading){
+      return(
+        <View>
+          <ActivityIndicator/>
+        </View>)
+    }
+
     return(
       <View>
         <Text>{this.state.type}</Text>
 
         <FlatList
-          data={this.state.data.data}
+          data={this.state.data}
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
             <TouchableOpacity onPress={() => this.getUser(item)}>
