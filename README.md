@@ -21,5 +21,6 @@ Wait for the build.Gradle to finish and then go to the command line and run
 ```
 npx react-native run-android
 ```
+Enjoy!
 
 
