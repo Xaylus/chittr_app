@@ -7,6 +7,7 @@ import {Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
@@ -71,6 +72,18 @@ componentDidMount(){
     this.props.navigation.push('CreateChit', {timestamp: item.timestamp})
   }
 
+  renderImage(item){
+    if(item.Image !== undefined){
+    //  let temp = JSON.parse(item.Image);
+      console.log("NEW ONE " +item.Image.uri);
+
+      return(
+        <Image  style={{width: 50, height: 50}}
+          source={{uri : item.Image.uri}} />
+      )
+    }
+  }
+
   render(){
     return(
       <View>
@@ -80,6 +93,7 @@ componentDidMount(){
         renderItem={ ({item}) =>
           <ScrollView style={styles.container}>
             <Text>{item.chit_content}</Text>
+            <Text>{this.renderImage(item)}</Text>
             <Text>created at {this.time(item)}</Text>
             <TouchableOpacity onPress={() => this.deleteDraft(item.timestamp)}>
               <Text> Delete </Text>
