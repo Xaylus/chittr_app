@@ -6,7 +6,8 @@ import {
   ScrollView,
   FlatList,
   StyleSheet,
-  ActivityIndicator
+  ActivityIndicator,
+  Image,
  } from 'react-native';
  import AsyncStorage from '@react-native-community/async-storage';
 
@@ -22,11 +23,15 @@ class MyProfile extends Component{
       followersTotal: 0,
       followingTotal:0,
       followersDataJson: "",
+      Image: null,
+      gotImage: false,
     }
     this.Logout = this.Logout.bind(this);
     this.UpdateInfo = this.UpdateInfo.bind(this);
     this.Followers = this.Followers.bind(this);
     this.Following = this.Following.bind(this);
+    this.getprofilePicture = this.getprofilePicture.bind(this);
+    this.displayImage = this.displayImage.bind(this);
   }
 
 
@@ -103,6 +108,26 @@ getFollowingData(){
   });
 }
 
+getprofilePicture(){
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + global.user_id + "/photo",{
+  method: 'GET',
+  headers: {
+    'X-Authorization': global.token
+  }
+}).then((response) =>{
+  if(response.status == 200){
+    console.log(response);
+    this.setState({
+      Image: response,
+      gotImage: true,
+    });
+  } else {
+    alert("Something went wrong IMAGE ");
+  }
+}).catch((error) => {
+  console.log(error)
+  });
+}
   Logout(){
     return fetch("http://10.0.2.2:3333/api/v0.0.5/logout",{
       method:'POST',
@@ -130,7 +155,7 @@ getFollowingData(){
   }
 
   UpdateInfo(){
-    this.props.navigation.navigate('UpdateUserInfo', { userData: this.state.userData});
+    this.props.navigation.navigate('UpdateUserInfo', { userData: this.state.userData, Image: this.state.Image});
   }
 
   Followers(){
@@ -139,12 +164,13 @@ getFollowingData(){
   Following(){
     this.props.navigation.push('Followers', {type: 'following', user_id: global.user_id});
   }
-  putThis(){
-    return(
-      <View>
-        <Text>{this.state.followingTotal}</Text>
-      </View>
-    )
+  displayImage(){
+    if(this.state.gotImage){
+      return(
+          <Image style={{width: 50, height: 50}}
+            source={{uri : this.state.Image.url}} />
+      )
+    }
   }
 
   render(){
@@ -158,6 +184,7 @@ getFollowingData(){
     return(
       <View>
         <Text>My Profile</Text>
+        {this.displayImage()}
         <Text>{this.state.userData.given_name + " " + this.state.userData.family_name}</Text>
         <Text>Num Followers = {this.state.followersTotal}</Text>
         <Text>Num Following = {this.state.followingTotal}</Text>
@@ -179,7 +206,6 @@ getFollowingData(){
           onPress={this.Followers} />
           <Button title="Following"
           onPress={this.Following} />
-          {this.putThis()}
       </View>
 
     );
@@ -189,6 +215,7 @@ getFollowingData(){
     await this.getUserData();
     await this.getFollowersData();
     await this.getFollowingData();
+    await this.getprofilePicture();
     this.setState({isLoading: false});
   }
 
