@@ -7,7 +7,9 @@ import {
   ScrollView,
   FlatList,
   ActivityIndicator,
-  StyleSheet
+  StyleSheet,
+  Image,
+  TouchableOpacity
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
@@ -16,15 +18,19 @@ constructor(props){
   super(props);
   this.state = {
     isLoading: true,
+    isSearching: false,
+    searchResult: [],
     searchItem: "",
     chitsList: [],
     test: "",
     userData: "",
+    id: 0,
   }
-
+  global.idArray = [];
+  global.response ="";
   this.search = this.search.bind(this);
   this.FollowUser = this.FollowUser.bind(this);
-  this.asyncTest = this.asyncTest.bind(this);
+  this.getToken = this.getToken.bind(this);
   //this.getData = this.getData.bind(this);
 }
 
@@ -37,7 +43,11 @@ search = () => {
     return response.json()
   }).then((responseJson) => {
     console.log(responseJson);
-    console.log(responseJson.user_id);
+    this.setState({
+      searchResult: responseJson,
+      isSearching: true,
+    })
+    //console.log(responseJson.user_id);
   //  this.props.navigation.navigate('OtherUserProfile', {
   //    user_id: responseJson.user_id,
   //  });
@@ -47,10 +57,13 @@ search = () => {
   this.props.navigation.navigate('UserProfile');
 }
 
-asyncTest = async() => {
+getToken = async() => {
   try{
     const token = await AsyncStorage.getItem('token')
+    const user_id = await AsyncStorage.getItem('user_id')
     this.setState({test: token});
+    global.token = token;
+    global.user_id = user_id;
   } catch(error) {
     console.log(error);
   }
@@ -58,8 +71,8 @@ asyncTest = async() => {
 
 getData(){
   var start = 0;
-  var count = 5;
-  return fetch("http://10.0.2.2:3333/api/v0.0.5/chits",{
+  var count = 20;
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/chits?start=" + start +"&count=" + count,{
     method:'GET',
     headers:{
       'X-Authorization': global.token,
@@ -67,7 +80,6 @@ getData(){
   }).then((response) => response.json()).then((responseJson) =>{
     console.log(responseJson);
     this.setState({
-      isLoading: false,
       chitsList: responseJson,
     });
   }).catch((error) =>{
@@ -121,6 +133,77 @@ FollowUser(){
   }).catch((error) => console.log(error));
 }
 
+getRenderImage = (item) =>{
+  let id = item.chit_id;
+  var url = "";
+  var temp = false;
+  this.getImage(item.chit_id).then((response) => {
+       //console.log("temp = " + temp);
+       console.log("global response = " + global.response);
+
+       url = global.response.url;
+       console.log("UWL = " +url);
+       console.log("RESPONSE + " + global.response);
+      return(
+          <View>
+            <Text>your a spaz</Text>
+            <Image style={{width: 50, height: 50}}
+              source={{uri : url}} />
+          </View>
+      );
+
+   });
+    return(
+        <View>
+          <Image style={{width: 50, height: 50}}
+            source={{uri :global.response.url}} />
+        </View>
+    );
+
+
+  //console.log(tempImage);
+
+
+  // return(
+  //   <View>
+  //   <Text>FUCK THIS SHIT</Text>
+  //   </View>
+  // );
+
+  //console.log(response.status);
+  //if(response.status == 200){
+  //  console.log(response);
+    //return(
+  //    <View>
+  //      <Image  style={{width: 50, height: 50}}
+    //      source={{uri : response.url}} />
+  //    </View>
+  //  );
+
+  }
+
+
+
+
+getImage = async(chitID)=>{
+  //console.log("GET IMAGEEEEEEEEEEEEEEEEE");
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/chits/" + chitID +"/photo",{
+    method:'GET',
+  }).then((response) =>{
+    if(response.status == 200 || response.status == 304){
+      //console.log(response);
+      global.response = response;
+
+      return true;
+    } else if(response.status == 404){
+      return false;
+    }
+  }).catch((error) => {
+    //console.log(error);
+    return false;
+  })
+}
+
   render(){
     if(this.state.isLoading){
       return(
@@ -128,12 +211,36 @@ FollowUser(){
           <ActivityIndicator/>
         </View>)
     }
+    if(this.state.isSearching){
+      return(
+        <View>
+        <TextInput placeholder="  Search  "
+          onChangeText={(text) => this.setState({searchItem: text})}
+          value={this.state.searchItem}/>
+          <TouchableOpacity onPress={() => this.setState({isSearching: false, searchItem: ""})} >
+            <Text> Cancel </Text>
+          </TouchableOpacity>
+        <Button title="Submit" onPress={this.search}/>
+        <FlatList
+          data={this.state.searchResult}
+          renderItem={ ({item}) =>
+            <ScrollView style={styles.container}>
+              <Text>{item.given_name + " " + item.family_name}</Text>
+              <Text>{item.email}</Text>
+            </ScrollView>
+          }
+          keyExtractor={item => item.user_id.toString()}
+          />
+        </View>
+      )
+    }
 
     return(
       <View>
         <TextInput placeholder="  Search  "
           onChangeText={(text) => this.setState({searchItem: text})}
           value={this.state.searchItem}/>
+
         <Button title="Submit" onPress={this.search}/>
         <Text>Home Screen</Text>
         <Text> token = {this.state.test}</Text>
@@ -142,6 +249,7 @@ FollowUser(){
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
               <Text>{item.user.given_name + " " + item.user.family_name}</Text>
+              {this.getRenderImage(item)}
               <Text>{item.chit_content}</Text>
             </ScrollView>
         }
@@ -152,12 +260,13 @@ FollowUser(){
   }
 
   componentDidMount = async() => {
+    await this.getToken();
     await this.getData();
     await this.getUserData();
+    this.setState({isLoading:false});
     console.log("global token = " + global.token);
     //dont use await as these should be done in the background
     // without after the data has loaded
-    this.asyncTest();
   }
 
 
