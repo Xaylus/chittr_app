@@ -5,9 +5,11 @@ import {
   Button,
   TextInput,
   PermissionsAndroid,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
+import ImagePicker from 'react-native-image-picker';
 
 class CreateChit extends Component{
 constructor(props){
@@ -19,22 +21,26 @@ constructor(props){
       longitude: 0,
       latitude: 0,
       geoLocationPermission: false,
+      cameraPermission: false,
       chitText:"",
       TextLength : 0,
       userData: "",
-      photo: "",
+      photo: null,
       isDraft: false,
       time : "",
       date: "",
       chitVar: global.user_id + 'savedDrafts',
       hasCoordinates: false,
+      gotImage: false,
+      imageURL: "",
+      Image: null,
   }
-
 
     this.requestLocationPermission = this.requestLocationPermission.bind(this);
     this.findCoordinates = this.findCoordinates.bind(this);
     this.storeGeoLocationPermission = this.storeGeoLocationPermission.bind(this);
     this.getGeoLocationPermissionValue = this.getGeoLocationPermissionValue.bind(this);
+    this.requestCameraPermission = this.requestCameraPermission.bind(this);
     this.postChit = this.postChit.bind(this);
     this.savedChits = this.savedChits.bind(this);
     this.saveDraft = this.saveDraft.bind(this);
@@ -42,6 +48,42 @@ constructor(props){
     this.getTime = this.getTime.bind(this);
     this.cancelChanges = this.cancelChanges.bind(this);
     this.removePostedDraft = this.removePostedDraft.bind(this);
+    this.imagePicker = this.imagePicker.bind(this);
+    this.postImage = this.postImage.bind(this);
+    this.renderImage = this.renderImage.bind(this);
+    this.getImage = this.getImage.bind(this);
+  }
+
+
+  imagePicker(){
+    const options = {
+      title: 'Select Avatar',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response = ', response);
+
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+    //const source = { uri: response.uri };
+      console.log(response);
+    // You can also display the image using data:
+    // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+
+        this.setState({
+          Image: response,
+          gotImage: true,
+        });
+      }
+    });
   }
 
   returningDraft = async() =>{
@@ -61,9 +103,13 @@ constructor(props){
           TextLength: draft[0].chit_content.length,
           latitude: draft[0].latitude,
           longitude: draft[0].longitude,
+          Image: draft[0].Image,
           date: draft[0].date,
         });
 
+        if(draft[0].Image !== undefined){
+          this.setState({gotImage: true});
+        }
         let ts = this.state.timestamp;
         let milliseconds = (ts % 1000) / 100;
         let secs = Math.floor((ts/ 1000) % 60);
@@ -105,6 +151,8 @@ constructor(props){
       isDraft: false,
       chitText: "",
       TextLength: 0,
+      gotImage: false,
+      Image: null,
     });
     this.getTime();
   }
@@ -187,6 +235,29 @@ constructor(props){
     this.storeGeoLocationPermission();
   }
 
+  requestCameraPermission = async() =>{
+    try{
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,{
+          title: 'Lab04 Location Permission',
+          message:'This app requires access to your location.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },);
+        if(granted === PermissionsAndroid.RESULTS.GRANTED){
+          this.setState({cameraPermission: true});
+          console.log("PEEP THROUGH THE CAMERA!");
+          return true;
+        } else {
+          console.log("NO PEEPING!");
+          return false;
+        }
+    } catch(error){
+      console.log(error);
+    }
+  }
+
   getUserData = async() => {
     try{
       let userData = await AsyncStorage.getItem('userData')
@@ -215,7 +286,6 @@ constructor(props){
   }
 
   postChit(){
-
     console.log("draft  = " + this.state.isDraft);
     if(!this.state.isDraft){
         this.getTime();
@@ -245,17 +315,81 @@ constructor(props){
     }).then((response) =>{
       if(response.status == 201){
         alert("Chit posted");
-        if(this.state.isDraft){
-          this.removePostedDraft();
-
-        }
+        return response.json();
       } else {
         alert('Something went wrong please try again later');
+      }
+    }).then((response) =>{
+      if(this.state.isDraft){
+        this.removePostedDraft();
+      }
+      if(this.state.Image !== null){
+        console.log("response json " + response.chit_id);
+        this.postImage(response.chit_id);
       }
     }).catch((error) => console.log(error));
 
   }
 
+  postImage(chitID){
+    console.log("IMAGE");
+    return fetch("http://10.0.2.2:3333/api/v0.0.5/chits/" + chitID + "/photo",{
+      method:'POST',
+      headers:{
+        'Content-Type' : 'image/jpg',
+        'X-Authorization': global.token,
+      },
+      body: this.state.Image
+    }).then((response) => {
+      if(response.status == 201){
+        console.log("IT WORKED");
+      } else{
+        console.log("IT didnt work");
+      }
+    });
+  }
+
+  getImage(){
+    console.log("GET IMAGEEEEEEEEEEEEEEEEE");
+    return fetch("http://10.0.2.2:3333/api/v0.0.5/chits/17/photo",{
+      method:'GET',
+      headers: {
+        'Content_Type': 'image/jpg',
+      }
+    }).then((response) =>{
+      console.log(response);
+
+      this.setState({
+        gotImage: true,
+        Image: response
+      });
+      console.log(this.state.Image);
+    }).catch((error) => {
+      console.log(error);
+    })
+  }
+
+  renderImage(){
+    if(this.state.gotImage){
+      if(this.state.Image.uri !== undefined){
+        return(
+          <View>
+            <Text>{this.state.Image.url}</Text>
+            <Image  style={{width: 50, height: 50}}
+              source={{uri : this.state.Image.uri}} />
+              </View>
+            );
+      } else {
+        return(
+          <View>
+            <Text>{this.state.Image.url}</Text>
+            <Image  style={{width: 50, height: 50}}
+              source={{uri : this.state.Image.url}} />
+              </View>
+            );
+      }
+    }
+  }
   removePostedDraft = async() =>{
     try{
       var draftsArray = await AsyncStorage.getItem(this.state.chitVar);
@@ -281,10 +415,10 @@ constructor(props){
     let temp = await this.findCoordinates();
     this.getTime();
     }
-        console.log("latitude! = " + this.state.latitude);
+    console.log("latitude! = " + this.state.latitude);
     let chit = {
       chit_content: this.state.chitText,
-      photo: this.state.photo,
+      Image: this.state.Image,
       timestamp: this.state.timestamp,
       date: this.state.date,
       latitude: this.state.latitude,
@@ -307,7 +441,7 @@ constructor(props){
         savedDrafts = JSON.stringify(savedDrafts);
         //console.log(savedDrafts);
         await AsyncStorage.setItem(this.state.chitVar, savedDrafts);
-    }
+      }
     } catch(error){
       console.log(error);
     }
@@ -340,14 +474,19 @@ constructor(props){
   componentDidMount(){
     this.getUserData();
     this.getGeoLocationPermissionValue();
-    if(!this.state.permission){
-      this.state.permission = this.requestLocationPermission();
+
+    if(!this.state.geoLocationPermission){
+      this.state.geoLocationPermission = this.requestLocationPermission();
+    }
+    if(!this.state.cameraPermission){
+      this.state.cameraPermission = this.requestCameraPermission();
     }
     this.getTime();
     this.returningDraft();
   }
 
   render(){
+    const {Image} = this.state;
     return(
       <View>
         <Text>Create Chits</Text>
@@ -371,6 +510,15 @@ constructor(props){
         <Button title="set location"
           onPress={this.findCoordinates} />
         {this.cancelChangesRender()}
+        <Button title="imagePicker"
+        onPress={() => this.imagePicker()} />
+        <Button title="Postimage"
+        onPress={() => this.postImage()} />
+        <Button title="displayImages"
+          onPress={() => this.getImage()}/>
+        {this.renderImage()}
+        <Button title=" Delete Image"
+          onPress={() => this.setState({Image: null})} />
 
 
 
