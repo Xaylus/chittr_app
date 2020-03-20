@@ -22,6 +22,8 @@ constructor(props){
     followersTotal:0,
     followButtonName: "Follow",
     isLoading: true,
+    Image: null,
+    gotImage: false,
   }
   this.Followers = this.Followers.bind(this);
   this.Following = this.Following.bind(this);
@@ -30,6 +32,8 @@ constructor(props){
   this.getFollowingData = this.getFollowingData.bind(this);
   this.isFollowingRender = this.isFollowingRender.bind(this);
   this.FollowBtnPress = this.FollowBtnPress.bind(this);
+  this.renderImage = this.renderImage.bind(this);
+  this.getprofilePicture = this.getprofilePicture.bind(this);
 
 }
 getUserData(){
@@ -48,6 +52,7 @@ getUserData(){
       console.log(error);
   });
 }
+
 getFollowersData(){
   return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + this.state.user_id + "/followers",{
     method:'GET',
@@ -77,6 +82,25 @@ getFollowersData(){
     console.log(error);
   });
 }
+
+getprofilePicture(){
+  return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + this.state.user_id + "/photo",{
+  method: 'GET',
+}).then((response) =>{
+  if(response.status == 200){
+    console.log(response);
+    this.setState({
+      Image: response,
+      gotImage: true,
+    });
+  } else {
+    alert("Something went wrong IMAGE ");
+  }
+}).catch((error) => {
+  console.log(error)
+  });
+}
+
 
 getFollowingData(){
   return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + this.state.user_id + "/following",{
@@ -178,6 +202,15 @@ FollowBtnPress(){
   }
 }
 
+renderImage(){
+  if(this.state.gotImage){
+    return(
+      <Image style={{width: 50, height: 50}}
+        source={{uri : this.state.Image.url}} />
+    )
+  }
+
+}
   render(){
     if(this.state.isLoading){
       return(
@@ -189,6 +222,7 @@ FollowBtnPress(){
     return(
       <View>
         <Text>My Profile</Text>
+        {this.renderImage()}
         <Text>{this.state.userData.given_name + " " + this.state.userData.family_name}</Text>
 
         <FlatList
@@ -209,6 +243,7 @@ FollowBtnPress(){
         <Button title={this.state.followButtonName}
           onPress={this.FollowBtnPress} />
           {this.isFollowingRender()}
+
 
       </View>
     );
