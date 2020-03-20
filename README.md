@@ -6,6 +6,12 @@ This app works like twitter, the users can post things that are called 'Chits' t
 First you need to navigate to the command prompt and the folder location of the project.
 Then you need to run 
 ```
+npm install @react-native-community/async-storage
+npm install react-native-image-picker
+npm install raect-navigation
+npm install react-navigation-tabs
+npm install react-navigation-stack
+npm install react-native-geolocation-service
 npm install
 ```
 This should run and install all dependancies. (Might take a little while)
