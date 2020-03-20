@@ -22,7 +22,6 @@ constructor(props){
     isLoading: true,
   }
   this.getUser = this.getUser.bind(this);
-  this.refresh = this.refresh.bind(this);
 }
 
 componentDidMount = async() => {
@@ -30,8 +29,6 @@ componentDidMount = async() => {
   this.setState({isLoading: false});
 }
 
-refresh(){
-}
 
 getData() {
   return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + this.state.user_id + "/" + this.state.type,{
@@ -74,23 +71,35 @@ getUser(user){
 
     return(
       <View>
-        <Text>{this.state.type}</Text>
-
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>{this.state.type}</Text>
+      </View>
         <FlatList
           data={this.state.data}
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
-            <TouchableOpacity onPress={() => this.getUser(item)}>
-              <Text>{item.given_name + " " + item.family_name}</Text>
-            </TouchableOpacity>
+            <View style={styles.nameContainer}>
+              <Text style={styles.nameText}>Name: </Text>
+              <TouchableOpacity onPress={() => this.getUser(item)}>
+                <Text style={styles.nameText}>{item.given_name + " " + item.family_name}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.nameContainer}>
+              <Text style={styles.nameText}>Email: </Text>
+              <TouchableOpacity onPress={() => this.getUser(item)}>
+                <Text style={styles.nameText}>{item.email}</Text>
+              </TouchableOpacity>
+            </View>
             </ScrollView>
 
         }
         keyExtractor={item => item.user_id.toString()}
         />
-
-        <Button title="HAA"
-          onPress={this.refresh}/>
+        <View >
+          <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+            <Text style={styles.buttons}>Back</Text>
+            </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -100,8 +109,55 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#000000'
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
+    margin: 20,
   },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  nameText:{
+    alignItems: 'center',
+    fontSize: 15,
+    marginTop: 0,
+  },
+  img:{
+    width: 150,
+    height: 150,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  nameContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  }
 });
+
+
 
 export default Follow;

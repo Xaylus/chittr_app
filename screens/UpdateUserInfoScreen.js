@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  StyleSheet,
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 
@@ -161,18 +162,25 @@ imagePicker(){
     if(this.state.changePassword){
       return(
         <View>
-          <TextInput placeholder="Old Password"
-          onChangeText={(text) => this.setState({old_password:text})}
-          value={this.state.old_password} />
-
-          <TextInput placeholder="New Password"
-          onChangeText={(text) => this.setState({new_password:text})}
-          value={this.state.new_password} />
-
-          <TextInput placeholder="Confirm password"
-          onChangeText={(text) => this.setState({confirm_password: text})}
-          value={this.state.confirm_password} />
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Old Password: </Text>
+          <TextInput placeholder="Old Password" style={styles.inputText} onChangeText={(text) => this.setState({old_password:text})}
+            value={this.state.old_password} />
         </View>
+
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>New Password: </Text>
+          <TextInput placeholder="New Password" style={styles.inputText} onChangeText={(text) => this.setState({new_password:text})}
+            value={this.state.new_password} />
+        </View>
+
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Confirm Password: </Text>
+          <TextInput placeholder="Confirm Password" style={styles.inputText} onChangeText={(text) => this.setState({confirm_password: text})}
+            value={this.state.confirm_password} />
+        </View>
+        </View>
+
       );
     }
   }
@@ -180,8 +188,8 @@ imagePicker(){
 renderImage(){
   if(this.state.gotImage){
     return(
-      <View>
-        <Image style={{width: 50, height: 50}}
+      <View style={styles.imgContainer}>
+        <Image style={styles.img}
           source={{uri : this.state.Image.uri}} />
       </View>
     )
@@ -191,30 +199,119 @@ renderImage(){
   render(){
     return(
       <View>
-        <Text>My Profile</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>Update Information</Text>
+        </View>
         {this.renderImage()}
-        <Button title="Change profile picture"
-        onPress={() => this.imagePicker()} />
-        <TextInput onChangeText={(text) => this.setState({given_name: text})}
-        value={this.state.given_name} />
-        <TextInput onChangeText={(text) => this.setState({family_name: text})}
-        value={this.state.family_name}/>
-        <TextInput onChangeText={(text) => this.setState({email:text})}
-        value={this.state.email} />
-
-        <TouchableOpacity onPress={() => this.setState({changePassword: true})} >
-          <Text> Change Password? </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.longButton} onPress={() => this.imagePicker()}>
+            <Text>Change Profile Picture</Text>
+            </TouchableOpacity>
+        </View>
+        <View style={styles.InputContainer}>
+        <Text style={styles.titles}>Forename: </Text>
+          <TextInput style={styles.inputText} onChangeText={(text) => this.setState({given_name: text})}
+            value={this.state.given_name} />
+        </View>
+        <View style={styles.InputContainer}>
+        <Text style={styles.titles}>Surname: </Text>
+          <TextInput style={styles.inputText} onChangeText={(text) => this.setState({family_name: text})}
+            value={this.state.family_name}/>
+        </View>
+        <View style={styles.InputContainer}>
+        <Text style={styles.titles}>Email: </Text>
+          <TextInput style={styles.inputText} onChangeText={(text) => this.setState({email:text})}
+            value={this.state.email} />
+        </View>
+        <View style={styles.headerContainer}>
+          <TouchableOpacity style={styles.longButton} onPress={() => this.setState({changePassword: true})} >
+            <Text> Change Password? </Text>
+          </TouchableOpacity>
+        </View>
         {this.addPassword()}
 
-        <Button title="Submit"
-        onPress={this.Submit} />
-        <Button title="Cancel"
-        onPress={this.Cancel} />
-
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.buttons} onPress={() => this.Submit()} >
+            <Text> Submit </Text>
+          </TouchableOpacity>
+            <TouchableOpacity style={styles.buttons} onPress={() => this.Cancel()} >
+              <Text> Cancel </Text>
+            </TouchableOpacity>
+        </View>
       </View>
     );
   }
 }
+
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  img:{
+    width: 150,
+    height: 150,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  followingContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  InputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  },
+  longButton:{
+    width: '40%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  },
+  inputText:{
+    width: '50%'
+  },
+  titles: {
+    padding: 14,
+    width: '25%'
+  },
+  longTitle:{
+    padding: 14,
+    width: '40%'
+  }
+});
 
 export default UpdateUserInfo;

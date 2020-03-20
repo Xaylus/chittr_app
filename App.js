@@ -24,7 +24,10 @@ const homeAppsStack = createStackNavigator({
     }
   },
   OtherUserProfile:{
-    screen: UserProfileScreen
+    screen: UserProfileScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
   }
 },{
   initialRouteName:"AllChits",
@@ -49,16 +52,28 @@ const ChitStack = createStackNavigator({
 
 const userAppStack = createStackNavigator({
   UserProfile:{
-    screen: MyProfileScreen
+    screen: MyProfileScreen,
+    navigationOptions:{
+      headerShown: false,
+    },
   },
   UpdateUserInfo:{
-    screen: UpdateUserInfoScreen
+    screen: UpdateUserInfoScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
   },
   Followers:{
-    screen: FollowersScreen
+    screen: FollowersScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
   },
   OtherUserProfile:{
-    screen: UserProfileScreen
+    screen: UserProfileScreen,
+    navigationOptions: {
+      headerShown: false,
+    }
   },
 },{
   initialRouteName:"UserProfile",
@@ -72,7 +87,10 @@ const AppTabNav = createBottomTabNavigator({
     screen: ChitStack
   },
   MyProfile: {
-    screen: userAppStack
+    screen: userAppStack,
+    navigationOptions: {
+      headerShown: false,
+    }
   }
 });
 

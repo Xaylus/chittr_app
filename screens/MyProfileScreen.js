@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Image,
+  TouchableOpacity,
  } from 'react-native';
  import AsyncStorage from '@react-native-community/async-storage';
 
@@ -167,8 +168,10 @@ getprofilePicture(){
   displayImage(){
     if(this.state.gotImage){
       return(
-          <Image style={{width: 50, height: 50}}
+        <View style={styles.imgContainer}>
+          <Image style={styles.img}
             source={{uri : this.state.Image.url}} />
+        </View>
       )
     }
   }
@@ -183,17 +186,28 @@ getprofilePicture(){
 
     return(
       <View>
-        <Text>My Profile</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>{this.state.userData.given_name + " " + this.state.userData.family_name}</Text>
+      </View>
         {this.displayImage()}
-        <Text>{this.state.userData.given_name + " " + this.state.userData.family_name}</Text>
-        <Text>Num Followers = {this.state.followersTotal}</Text>
-        <Text>Num Following = {this.state.followingTotal}</Text>
-        <Button title="Logout"
-        onPress={this.Logout} />
-        <Button title="Update"
-        onPress={this.UpdateInfo} />
+        <View style={styles.followingContainer}>
+        <TouchableOpacity onPress={() => this.Followers()}>
+          <Text style={styles.header}>Followers  {this.state.followersTotal}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.Following()}>
+          <Text style={styles.header}>Following  {this.state.followingTotal}</Text>
+        </TouchableOpacity>
+        </View>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.buttons} onPress={() => this.Logout()}>
+            <Text>Logout</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttons} onPress={() => this.UpdateInfo()}>
+            <Text>Update</Text>
+          </TouchableOpacity>
+        </View>
 
-        <FlatList
+        <FlatList style={styles.flatList}
           data={this.state.chitsList}
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
@@ -202,10 +216,6 @@ getprofilePicture(){
           }
           keyExtractor={item => item.chit_id.toString()}
           />
-          <Button title="Followers"
-          onPress={this.Followers} />
-          <Button title="Following"
-          onPress={this.Following} />
       </View>
 
     );
@@ -225,8 +235,52 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#000000'
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
   },
+  flatList:{
+    marginTop: 10,
+    marginBottom: 50,
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  img:{
+    width: 150,
+    height: 150,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  followingContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  }
 });
 
 export default MyProfile;

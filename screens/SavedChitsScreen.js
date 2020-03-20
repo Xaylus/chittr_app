@@ -78,7 +78,7 @@ componentDidMount(){
       console.log("NEW ONE " +item.Image.uri);
 
       return(
-        <Image  style={{width: 50, height: 50}}
+        <Image  style={styles.img}
           source={{uri : item.Image.uri}} />
       )
     }
@@ -87,29 +87,34 @@ componentDidMount(){
   render(){
     return(
       <View>
-      <Text>Text</Text>
-      <FlatList
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Saved Drafts</Text>
+      </View>
+      <FlatList style={styles.flatList}
         data={this.state.savedDrafts}
         renderItem={ ({item}) =>
           <ScrollView style={styles.container}>
             <Text>{item.chit_content}</Text>
             <Text>{this.renderImage(item)}</Text>
             <Text>created at {this.time(item)}</Text>
-            <TouchableOpacity onPress={() => this.deleteDraft(item.timestamp)}>
-              <Text> Delete </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.editChit(item)}>
-              <Text> Edit </Text>
-            </TouchableOpacity>
+            <View styles={styles.buttonsContainer}>
+              <TouchableOpacity style={styles.buttons} onPress={() => this.deleteDraft(item.timestamp)}>
+                <Text> Delete </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.buttons} onPress={() => this.editChit(item)}>
+                <Text> Edit </Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
       }
       keyExtractor={item => item.timestamp.toString()}
       />
-
-
+      <View>
+        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+          <Text style={styles.buttons}>Back</Text>
+        </TouchableOpacity>
       </View>
-
-
+      </View>
     )
   }
 }
@@ -117,7 +122,50 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#000000'
+    borderColor: '#000000',
+    width: '90%',
+    marginLeft: '5%',
   },
+  flatList:{
+    marginTop: 10,
+    marginBottom: 50,
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  img:{
+    width: 75,
+    height: 75,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  followingContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  }
 });
 export default savedChits;

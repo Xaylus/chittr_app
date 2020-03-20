@@ -6,6 +6,9 @@ import {
   TextInput,
   PermissionsAndroid,
   Image,
+  StyleSheet,
+  TouchableOpacity,
+  Container,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
@@ -42,7 +45,7 @@ constructor(props){
     this.getGeoLocationPermissionValue = this.getGeoLocationPermissionValue.bind(this);
     this.requestCameraPermission = this.requestCameraPermission.bind(this);
     this.postChit = this.postChit.bind(this);
-    this.savedChits = this.savedChits.bind(this);
+    this.savedDrafts = this.savedDrafts.bind(this);
     this.saveDraft = this.saveDraft.bind(this);
     this.returningDraft = this.returningDraft.bind(this);
     this.getTime = this.getTime.bind(this);
@@ -52,6 +55,7 @@ constructor(props){
     this.postImage = this.postImage.bind(this);
     this.renderImage = this.renderImage.bind(this);
     this.getImage = this.getImage.bind(this);
+    this.getImageText = this.getImageText.bind(this);
   }
 
 
@@ -132,8 +136,11 @@ constructor(props){
   cancelChangesRender(){
     if(this.state.isDraft){
       return(
-        <Button title="cancel changes"
-          onPress={this.cancelChanges} />
+        <View style={styles.imgCoordsContainer}>
+          <TouchableOpacity style={styles.post} onPress={() => this.cancelChanges()}>
+            <Text>Cancel changes</Text>
+          </TouchableOpacity>
+        </View>
       )
     }
   }
@@ -373,19 +380,19 @@ constructor(props){
     if(this.state.gotImage){
       if(this.state.Image.uri !== undefined){
         return(
-          <View>
+          <View style={styles.imgContainer}>
             <Text>{this.state.Image.url}</Text>
-            <Image  style={{width: 50, height: 50}}
+            <Image  style={{width: 200, height: 200}}
               source={{uri : this.state.Image.uri}} />
-              </View>
+          </View>
             );
       } else {
         return(
-          <View>
+          <View style={styles.imgContainer}>
             <Text>{this.state.Image.url}</Text>
-            <Image  style={{width: 50, height: 50}}
+            <Image style={{width: 100, height: 100}}
               source={{uri : this.state.Image.url}} />
-              </View>
+          </View>
             );
       }
     }
@@ -405,7 +412,8 @@ constructor(props){
       console.log(error);
     }
   }
-  savedChits(){
+
+  savedDrafts(){
     this.props.navigation.navigate('SavedChits');
   }
 
@@ -471,6 +479,22 @@ constructor(props){
     }
   }
 
+getImageText(){
+  if(!this.state.gotImage){
+    return(
+    <TouchableOpacity style={styles.button} onPress={() => this.imagePicker()}>
+      <Text>Get Image</Text>
+    </TouchableOpacity>
+  )
+  } else{
+    return(
+    <TouchableOpacity style={styles.button} onPress={() => this.setState({Image: null, gotImage: false})}>
+      <Text>Delete Image</Text>
+    </TouchableOpacity>
+  )
+  }
+
+}
   componentDidMount(){
     this.getUserData();
     this.getGeoLocationPermissionValue();
@@ -486,45 +510,115 @@ constructor(props){
   }
 
   render(){
-    const {Image} = this.state;
     return(
       <View>
-        <Text>Create Chits</Text>
-        <Text>{this.state.name}</Text>
-        <TextInput placeholder =" Chit Text"
-          onChangeText={(text) => this.setState({chitText: text, TextLength: text.length})}
-          value={this.state.chitText}
-          maxLength={144}
-          multiLine={true}
-        />
-        <Text> Characters used = {this.state.TextLength} / 144</Text>
-        <Text> Created at {this.state.time} </Text>
-        {this.coordinatesRender()}
-        <Text>{this.state.location}</Text>
-        <Button title="Post"
-        onPress={this.postChit} />
-        <Button title="Saved Chits"
-        onPress={this.savedChits} />
-        <Button title="Save draft"
-        onPress={this.saveDraft}/>
-        <Button title="set location"
-          onPress={this.findCoordinates} />
-        {this.cancelChangesRender()}
-        <Button title="imagePicker"
-        onPress={() => this.imagePicker()} />
-        <Button title="Postimage"
-        onPress={() => this.postImage()} />
-        <Button title="displayImages"
-          onPress={() => this.getImage()}/>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Post Chit</Text>
+      </View>
         {this.renderImage()}
-        <Button title=" Delete Image"
-          onPress={() => this.setState({Image: null})} />
-
+        <View style={styles.textInputContainer}>
+          <TextInput style={styles.textInput} placeholder =" Chit Text"
+            onChangeText={(text) => this.setState({chitText: text, TextLength: text.length})}
+            value={this.state.chitText}
+            maxLength={144}
+            multiLine={true}
+            numberOfLines={4}
+          />
+        </View>
+        <View style={styles.textInputContainer}>
+          <Text> Characters used = {this.state.TextLength} / 144</Text>
+        </View>
+        <View style={styles.textInputContainer}>
+          <Text> Created at {this.state.time} </Text>
+        </View>
+        <View style={styles.textInputContainer}>
+          {this.coordinatesRender()}
+        </View>
+        <Text>{this.state.location}</Text>
+        <View style={styles.imgCoordsContainer}>
+          {this.getImageText()}
+          <TouchableOpacity style={styles.button} onPress={() => this.findCoordinates()}>
+            <Text>Set Location</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.imgCoordsContainer}>
+          <TouchableOpacity style={styles.button} onPress={() => this.saveDraft()}>
+            <Text>Save Draft</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => this.savedDrafts()}>
+            <Text>Saved Drafts</Text>
+            </TouchableOpacity>
+        </View>
+        <View style={styles.postContainer}>
+          <TouchableOpacity style={styles.post} onPress={() => this.postChit()}>
+            <Text>Post</Text>
+          </TouchableOpacity>
+        </View>
+        {this.cancelChangesRender()}
 
 
       </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
+  },
+  button: {
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  },
+  post: {
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  },
+  postContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  imgCoordsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  textInput:{
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    width: '80%',
+  },
+  textInputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  }
+});
+
 
 export default CreateChit;

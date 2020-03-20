@@ -1,6 +1,14 @@
 
 import React, { Component } from 'react';
-import { Text, View, TextInput, Button } from 'react-native';
+import {
+  Text,
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+
 import AsyncStorage from '@react-native-community/async-storage';
 
 class loginScreen extends Component {
@@ -92,22 +100,97 @@ static navigationOptions = {
   render(){
     return(
       <View>
-      <Text> token = {this.state.test}</Text>
-        <TextInput placeholder="Email"
-        onChangeText={(text) => this.setState({email:text})}
-        value={this.state.email}/>
-        <TextInput placeholder="Password"
-        onChangeText={(text) => this.setState({password:text})}
-        value={this.state.password}
-        secureTextEntry={true} />
-        <Button title="Submit"
-        onPress={this.Login} />
-        <Button title="Sign up"
-        onPress={this.MoveToSignUp} />
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>Login</Text>
+        </View>
+
+        <View style={styles.InputContainer}>
+        <Text style={styles.titles}>Email: </Text>
+          <TextInput style={styles.inputText} placeholder="Email" onChangeText={(text) => this.setState({email:text})}
+            value={this.state.email} />
+        </View>
+
+        <View style={styles.InputContainer}>
+        <Text style={styles.titles}>Password: </Text>
+          <TextInput style={styles.inputText} placeholder="Password" onChangeText={(text) => this.setState({password:text})}
+            value={this.state.password}
+            secureTextEntry={true} />
+        </View>
+
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.buttons} onPress={() => this.Login()} >
+            <Text> Login </Text>
+          </TouchableOpacity>
+            <TouchableOpacity style={styles.buttons} onPress={() => this.MoveToSignUp()} >
+              <Text> Sign Up </Text>
+            </TouchableOpacity>
+        </View>
       </View>
     )
   }
 
 }
 
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
+  },
+  flatList:{
+    marginTop: 10,
+    marginBottom: 50,
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  img:{
+    width: 150,
+    height: 150,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  followingContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  InputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  inputText:{
+    width: '50%'
+  },
+  titles: {
+    padding: 14,
+    width: '25%'
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  }
+});
 export default loginScreen;

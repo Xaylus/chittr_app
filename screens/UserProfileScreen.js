@@ -7,6 +7,8 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 
 class UserProfile extends Component{
@@ -54,6 +56,7 @@ getUserData(){
 }
 
 getFollowersData(){
+  var youFollowingUser = false;
   return fetch("http://10.0.2.2:3333/api/v0.0.5/user/" + this.state.user_id + "/followers",{
     method:'GET',
     headers:{
@@ -68,9 +71,12 @@ getFollowersData(){
       alert('nothing found');
     }else{
       let tempArray = response.map(function(item){
+        if(item.user_id == global.user_id){
+          youFollowingUser = true;
+        }
         return item.user_id
       });
-      if(tempArray.includes(global.user_id)){
+      if(youFollowingUser){
         this.setState({
           youFollowingUser: true,
           followButtonName: "Unfollow",
@@ -139,6 +145,7 @@ isFollowingRender(){
 }
 componentDidMount = async() =>{
   await this.getUserData();
+  await this.getprofilePicture();
   await this.getFollowersData();
   await this.getFollowingData();
   this.setState({isLoading: false});
@@ -158,6 +165,7 @@ FollowUser(){
       'X-Authorization': global.token,
     },
   }).then((response) =>{
+    console.log(response);
     if(response.status == 200){
       this.setState({
         youFollowingUser: true,
@@ -205,8 +213,10 @@ FollowBtnPress(){
 renderImage(){
   if(this.state.gotImage){
     return(
-      <Image style={{width: 50, height: 50}}
-        source={{uri : this.state.Image.url}} />
+      <View style={styles.imgContainer}>
+        <Image style={styles.img}
+          source={{uri : this.state.Image.url}} />
+      </View>
     )
   }
 
@@ -221,11 +231,28 @@ renderImage(){
 
     return(
       <View>
-        <Text>My Profile</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>{this.state.userData.given_name + " " + this.state.userData.family_name}</Text>
+      </View>
         {this.renderImage()}
-        <Text>{this.state.userData.given_name + " " + this.state.userData.family_name}</Text>
-
-        <FlatList
+        <View style={styles.followingContainer}>
+        <TouchableOpacity onPress={() => this.Followers()}>
+          <Text style={styles.header}>Followers  {this.state.followersTotal}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.Following()}>
+          <Text style={styles.header}>Following  {this.state.followingTotal}</Text>
+        </TouchableOpacity>
+        </View>
+        <View style={styles.followContainer}>
+          <TouchableOpacity style={styles.buttons} onPress={() => this.FollowBtnPress()}>
+            <Text>{this.state.followButtonName}</Text>
+          </TouchableOpacity>
+        </View>
+        {this.isFollowingRender()}
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}> Chits</Text>
+        </View>
+        <FlatList style={styles.flatList}
           data={this.state.chitsList}
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
@@ -234,15 +261,7 @@ renderImage(){
           }
           keyExtractor={item => item.chit_id.toString()}
           />
-        <Button title="Followers"
-          onPress={this.Followers} />
-        <Button title="Following"
-        onPress={this.Following} />
-        <Text> Num of Following = {this.state.followingTotal}</Text>
-        <Text> Num of Followers = {this.state.followersTotal}</Text>
-        <Button title={this.state.followButtonName}
-          onPress={this.FollowBtnPress} />
-          {this.isFollowingRender()}
+
 
 
       </View>
@@ -254,8 +273,55 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#000000'
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
   },
+  flatList:{
+    marginTop: 10,
+    marginBottom: 50,
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  img:{
+    width: 150,
+    height: 150,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  followingContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  followContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  }
 });
 
 export default UserProfile;

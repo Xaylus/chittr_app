@@ -146,7 +146,6 @@ getRenderImage = (item) =>{
        console.log("RESPONSE + " + global.response);
       return(
           <View>
-            <Text>your a spaz</Text>
             <Image style={{width: 50, height: 50}}
               source={{uri : url}} />
           </View>
@@ -159,26 +158,6 @@ getRenderImage = (item) =>{
             source={{uri :global.response.url}} />
         </View>
     );
-
-
-  //console.log(tempImage);
-
-
-  // return(
-  //   <View>
-  //   <Text>FUCK THIS SHIT</Text>
-  //   </View>
-  // );
-
-  //console.log(response.status);
-  //if(response.status == 200){
-  //  console.log(response);
-    //return(
-  //    <View>
-  //      <Image  style={{width: 50, height: 50}}
-    //      source={{uri : response.url}} />
-  //    </View>
-  //  );
 
   }
 
@@ -204,6 +183,10 @@ getImage = async(chitID)=>{
   })
 }
 
+navigateToUserScreen(user){
+  this.props.navigation.navigate('OtherUserProfile', { user_id: user.user_id});
+}
+
   render(){
     if(this.state.isLoading){
       return(
@@ -214,20 +197,25 @@ getImage = async(chitID)=>{
     if(this.state.isSearching){
       return(
         <View>
+        <View style={styles.headerContainer}>
+                <Text style={styles.header}>Home Screen</Text>
+        </View>
         <TextInput placeholder="  Search  "
           onChangeText={(text) => this.setState({searchItem: text})}
           value={this.state.searchItem}/>
-          <TouchableOpacity onPress={() => this.setState({isSearching: false, searchItem: ""})} >
+          <TouchableOpacity style={styles.button} onPress={() => this.setState({isSearching: false, searchItem: ""})}>
             <Text> Cancel </Text>
           </TouchableOpacity>
         <Button title="Submit" onPress={this.search}/>
         <FlatList
           data={this.state.searchResult}
           renderItem={ ({item}) =>
-            <ScrollView style={styles.container}>
-              <Text>{item.given_name + " " + item.family_name}</Text>
-              <Text>{item.email}</Text>
-            </ScrollView>
+            <TouchableOpacity onPress={()=>this.navigateToUserScreen(item)} >
+              <ScrollView style={styles.container}>
+                <Text>{item.given_name + " " + item.family_name}</Text>
+                <Text>{item.email}</Text>
+                </ScrollView>
+            </TouchableOpacity>
           }
           keyExtractor={item => item.user_id.toString()}
           />
@@ -236,15 +224,15 @@ getImage = async(chitID)=>{
     }
 
     return(
-      <View>
-        <TextInput placeholder="  Search  "
+      <View style={styles.view}>
+      <View style={styles.headerContainer}>
+              <Text style={styles.header}>Home Screen</Text>
+      </View>
+        <TextInput style={styles.search}placeholder="  Search  "
           onChangeText={(text) => this.setState({searchItem: text})}
           value={this.state.searchItem}/>
-
         <Button title="Submit" onPress={this.search}/>
-        <Text>Home Screen</Text>
-        <Text> token = {this.state.test}</Text>
-        <FlatList
+        <FlatList style={styles.flatList}
           data={this.state.chitsList}
           renderItem={ ({item}) =>
             <ScrollView style={styles.container}>
@@ -277,8 +265,41 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#000000'
+    borderColor: '#000000',
+    width: '90%',
+    marginLeft: '5%',
+    margin: '1%'
   },
+  flatList:{
+    marginTop: 10,
+    marginBottom: 50,
+  },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  search: {
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+    paddingLeft: 10,
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  }
 });
 
 export default HomeScreen;

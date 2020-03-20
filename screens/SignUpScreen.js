@@ -6,6 +6,7 @@ import {
   TextInput,
   StyleSheet,
   Image,
+  TouchableOpacity
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 
@@ -19,8 +20,6 @@ constructor(props){
     confirmEmail:"",
     password:"",
     confirmPassword:"",
-    emailCorrectColor: "",
-    passwordCorrectColor:"",
     token:"",
     Image:null,
     gotImage: false,
@@ -124,22 +123,6 @@ storeToken = async() => {
   }
 }
 
-ConfirmEmailOnChange(text){
-  this.setState({confirmEmail: text});
-  if(text === this.state.email){
-    this.setState({emailCorrectColor: '#00FF00'});
-  } else{
-    this.setState({emailCorrectColor: '#FF0000'});
-  }
-}
-ConfirmPasswordOnChange(text){
-  this.setState({confirmPassword: text});
-  if(text === this.state.password){
-    this.setState({passwordCorrectColor: '#00FF00'});
-  } else{
-    this.setState({passwordCorrectColor: '#FF0000'});
-  }
-}
 
 imagePicker(){
   const options = {
@@ -176,8 +159,8 @@ imagePicker(){
 renderImage(){
   if(this.state.gotImage){
     return(
-      <View>
-        <Image style={{width: 50, height: 50}}
+      <View style={styles.imgContainer}>
+        <Image style={styles.img}
           source={{uri : this.state.Image.uri}} />
       </View>
     )
@@ -190,33 +173,52 @@ GoBack(){
 render(){
     return(
       <View>
-        <Text>Sign up Screen</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Sign Up</Text>
+      </View>
         {this.renderImage()}
-        <Button title="add profile picture"
-        onPress={this.imagePicker} />
-        <TextInput placeholder="Forename"
-        onChangeText={(text) => this.setState({forename:text})}
-        value={this.state.forename} />
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.longButton} onPress={() => this.imagePicker()}>
+            <Text>Add Profile Picture</Text>
+            </TouchableOpacity>
+        </View>
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Forename: </Text>
+          <TextInput style={styles.inputText} placeholder="Forename" onChangeText={(text) => this.setState({forename: text})}
+            value={this.state.forename} />
+        </View>
 
-        <TextInput placeholder="Surname"
-        onChangeText={(text) => this.setState({surname:text})}
-        value={this.state.surname} />
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Surname: </Text>
+          <TextInput style={styles.inputText} placeholder="surname" onChangeText={(text) => this.setState({surname: text})}
+            value={this.state.surname}/>
+        </View>
 
-        <TextInput placeholder="Email"
-        onChangeText={(text) => this.setState({email:text})}
-        value={this.state.email} />
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Email: </Text>
+          <TextInput style={styles.inputText} placeholder="email" onChangeText={(text) => this.setState({email:text})}
+            value={this.state.email} />
+        </View>
 
-        <TextInput placeholder="Confirm email"
-        onChangeText={(text) => this.ConfirmEmailOnChange(text)}
-        value={this.state.confirmEmail} />
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Confirm Email: </Text>
+          <TextInput style={styles.inputText} placeholder="Confirm Email" onChangeText={(text) => this.setState({confirmEmail:text})}
+            value={this.state.confirmEmail} />
+        </View>
 
-        <TextInput placeholder="password"
-        onChangeText={(text) => this.setState({password: text})}
-        value={this.state.password} />
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Password: </Text>
+          <TextInput placeholder="Password" style={styles.inputText} onChangeText={(text) => this.setState({password:text})}
+            value={this.state.password}
+            secureTextEntry={true}/>
+        </View>
 
-        <TextInput placeholder="Confirm password"
-        onChangeText={(text) => this.ConfirmPasswordOnChange(text)}
-        value={this.state.confirmPassword} />
+        <View style={styles.InputContainer}>
+        <Text style={styles.longTitle}>Confirm Password: </Text>
+          <TextInput  placeholder="Confirm Password" style={styles.inputText} onChangeText={(text) => this.setState({confirmPassword: text})}
+            value={this.state.confirmPassword}
+            secureTextEntry={true}/>
+        </View>
 
         <Button title="Sign Me Up!"
           onPress={this.CreateAccount} />
@@ -224,8 +226,6 @@ render(){
         <Button title="Back"
         onPress={this.GoBack} />
 
-        <Text style={[styles.square, { backgroundColor: this.state.emailCorrectColor}]}></Text>
-        <Text style={[styles.square, { backgroundColor: this.state.passwordCorrectColor}]}></Text>
 
       </View>
     );
@@ -233,10 +233,74 @@ render(){
 }
 
 const styles = StyleSheet.create({
-  square:{
-    width:25,
-    height:25,
+  container: {
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    width: '80%',
+    marginLeft: '10%',
   },
+  header: {
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginTop: 0,
+  },
+  headerContainer:{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  img:{
+    width: 150,
+    height: 150,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  imgContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  followingContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  buttonsContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  InputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  buttons:{
+    width: '25%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  },
+  longButton:{
+    width: '40%',
+    alignItems: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000000',
+    margin: 10,
+  },
+  inputText:{
+    width: '50%'
+  },
+  titles: {
+    padding: 14,
+    width: '25%'
+  },
+  longTitle:{
+    marginLeft: 70,
+    padding: 14,
+    width: '30%'
+  }
 });
 
 export default SignUp;
